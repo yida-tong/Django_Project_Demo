@@ -1,5 +1,5 @@
 # django-qualified
-The objective of this project is to demonstrate my skills in django, project planning and web development
+The objective of this project is to demonstrate my skills in web development using django and system design
 
 ### Dependencies
 This project requires the following python packages
@@ -13,12 +13,11 @@ This project requires the following js and css packages
 * jquery-ui 
 
 ### Tips
-* As always, use: pip3 freeze > requirements.txt to generate/update the requirements file.
 * As always, use: pip3 install -r requirements.txt to install the latest packages.
 
-### Some default credential for development
+### Credential for development
 ```
 Default admin
-user: admin@django.com
+user: admin@gmail.com
 pwd: mypassword
 ```
