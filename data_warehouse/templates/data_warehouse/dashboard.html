@@ -1,0 +1,226 @@
+{% extends 'mysite/base.html' %}
+
+{% load static %}
+{% block extra_template_tag %}{% load extra_tags %}{% endblock %}
+{% block sidebar %}{% home_sidebar request %}{% endblock %}
+
+{% block title %}Data Warehouse - Dashboard{% endblock %}
+{% block content_header %}Data Warehouse - Dashboard{% endblock %}
+
+{% block breadcrumb_menu %}
+  <ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i> Data Warehouse</a></li>
+    <li><a href="#">Dashboard</a></li>
+    <li class="active">Home</li>
+  </ol>
+{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+
+{% block banner %}
+  <div style="border-radius: 0; border-top-width: 1px; padding: 15px 30px; background: rgb(243, 156, 18); font-size: 16px; font-weight: 600;" class="box box-primary btn-flat">
+    <p style="color: rgba(255, 255, 255, 0.9); display: inline-block; margin-right: 10px; text-decoration: none; font-size: 20px">Welcome to CRUD demo!</p>
+    <a class="btn btn-default btn-sm" href="#" style="margin-top: -5px; border: 0; box-shadow: none; color: rgb(243, 156, 18); font-weight: 600; background: rgb(255, 255, 255); font-size: 13px">Explore!</a>
+    <button class="close" data-widget="remove" aria-hidden="true"  style="color: rgb(255, 255, 255); font-size: 20px;">×</button>
+  </div>
+{% endblock %}
+
+{% block main_content %}
+    <div class="row">
+      <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-aqua">
+          <div class="inner">
+            <h3>{{ payers_num }}</h3>
+
+            <p>Imported Packages</p>
+          </div>
+          <div class="icon">
+            <i class="ion ion-checkmark-round"></i>
+          </div>
+          <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-green">
+          <div class="inner">
+            <h3>53<sup style="font-size: 20px">%</sup></h3>
+
+            <p>Invoiced Amount</p>
+          </div>
+          <div class="icon">
+            <i class="ion ion-cash"></i>
+          </div>
+          <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-yellow">
+          <div class="inner">
+            <h3>44</h3>
+
+            <p>UTC Time</p>
+          </div>
+          <div class="icon">
+            <i class="ion ion-ios-time-outline"></i>
+          </div>
+          <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-maroon">
+          <div class="inner">
+            <h3>65</h3>
+
+            <p>West Coast Time</p>
+          </div>
+          <div class="icon">
+            <i class="ion ion-ios-time-outline"></i>
+          </div>
+          <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9">
+          <div class="box box-solid">
+            <div class="box-header with-border">
+              <h3 class="box-title">Data Warehouse Introduction</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <div class="box-group" id="accordion">
+                <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+                <div class="panel box box-primary">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                        Work Flow
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseOne" class="panel-collapse collapse in">
+                    <div class="box-body">
+                      <img class="img-responsive pad" src="{% static 'img/data_workflow.png' %}" alt="Photo">
+                    </div>
+                  </div>
+                </div>
+                <div class="panel box box-danger">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                        Collapsible Group Danger
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseTwo" class="panel-collapse collapse">
+                    <div class="box-body">
+                      Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
+                      wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
+                      eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
+                      assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred
+                      nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
+                      farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
+                      labore sustainable VHS.
+                    </div>
+                  </div>
+                </div>
+                <div class="panel box box-success">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                        Collapsible Group Success
+                      </a>
+                    </h4>
+                  </div>
+                  <div id="collapseThree" class="panel-collapse collapse">
+                    <div class="box-body">
+                      Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
+                      wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
+                      eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
+                      assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred
+                      nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
+                      farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
+                      labore sustainable VHS.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <div class="col-md-3">
+          <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs pull-right">
+              <li><a href="#tab_1-1" data-toggle="tab">Reset</a></li>
+              <li><a href="#tab_2-2" data-toggle="tab">Step 2</a></li>
+              <li class="active"><a href="#tab_3-2" data-toggle="tab">Step 1</a></li>
+              <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                  Dropdown <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="#">TBD</a></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="#">TBD</a></li>
+                  <li role="presentation" class="divider"></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="#">TBD</a></li>
+                </ul>
+              </li>
+              <li class="pull-left header"><i class="fa fa-th"></i> Control Panel</li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane active" id="tab_3-2">
+                <b>How to use:</b>
+                <p>Please download both csv files and upload at step 2 respectively</p>
+                <form method="get" action="{% url 'data_warehouse:csv_downloader' %}">
+                  <button type="submit" class="btn btn-block btn-primary" name="action" value="payers">Download Payers CSV</button>
+                  <button type="submit" class="btn btn-block btn-primary" name="action" value="shipments">Download Shipments CSV </button>
+                </form>
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="tab_2-2">
+                {% err_msg messages %}
+                <b>How to use:</b>
+                <p>Please upload the two files here</p>
+                <div class="form-group">
+                  <form method="post" action="{% url 'data_warehouse:csv_uploader' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label for="payers_csv">Payers input</label>
+                    <input type="file" id="payers_csv" name="payers_csv" required>
+                    <label for="shipment_csv">Shipments input</label>
+                    <input type="file" id="shipment_csv" name="shipment_csv" required>
+                    <p class="help-block">only csv file</p>
+                    <button type="submit" class="btn btn-flat btn-primary" name="action" value="upload">Upload</button>
+                  </form>
+                </div>
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="tab_1-1">
+                <div class="callout callout-danger" style="padding: 7px">
+                  <h4>Danger Zone</h4>
+                  <p>This button will clear the database. After done so, you can repeat step 1</p>
+                </div>
+                {% err_msg messages %}
+                <form method="post" action="{% url 'data_warehouse:reset' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-flat btn-danger" name="action" value="reset">Reset</button>
+                  <button type="submit" class="btn btn-flat btn-primary" name="action" value="sleep">Sleep</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+</script>
+{% endblock %}
+
+
+
+

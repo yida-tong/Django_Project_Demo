@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mysite.apps.MysiteConfig',
+    'mysite',
+    'data_warehouse'
 ]
 
 MIDDLEWARE = [
@@ -78,8 +79,12 @@ WSGI_APPLICATION = 'django_qualified.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'datfv9ii29s908',
+        'USER': 'uyqzbywnsicsmb',
+        'PASSWORD': 'f7aa944c42608b830730cb8ce973a62e3450b1b24dcda2c955f9fb5b4d5a9748',
+        'HOST': 'ec2-52-6-211-59.compute-1.amazonaws.com',
+        'PORT': '5432',
     }
 }
 
@@ -121,6 +126,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+# STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = None
+STATICFILES_DIRS = [os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static')]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

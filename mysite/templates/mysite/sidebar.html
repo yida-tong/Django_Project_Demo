@@ -1,0 +1,46 @@
+<ul class="sidebar-menu" data-widget="tree">
+  <li class="header">CRUD DEMO</li>
+  <li class="treeview {% if request.resolver_match.app_name == 'data_warehouse' %}active menu-open{% endif %}">
+    <a href="#">
+      <i class="fa fa-files-o"></i>
+      <span>Data Warehouse</span>
+      <span class="pull-right-container">
+        <span class="label label-primary pull-right">{{ payer_num }}</span>
+      </span>
+    </a>
+    <ul class="treeview-menu">
+      <li class="{% if request.resolver_match.app_name == 'data_warehouse' and request.path == '/data_warehouse/index/' %}active{% endif %}"><a href="{% url 'data_warehouse:index' %}"><i class="fa fa-circle-o"></i>Dashboard</a></li>
+      <li><a href="."><i class="fa fa-circle-o"></i>Import from Wizard</a></li>
+    </ul>
+  </li>
+
+  <li class="treeview">
+    <a href="#">
+      <i class="fa fa-dashboard"></i> <span>Shipment Tracking</span>
+      <span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i>
+      </span>
+    </a>
+    <ul class="treeview-menu">
+      <li><a href="."><i class="fa fa-circle-o"></i> Dashboard v1</a></li>
+      <li><a href="../../index2.html"><i class="fa fa-circle-o"></i> Dashboard v2</a></li>
+    </ul>
+  </li>
+
+  <li class="treeview">
+    <a href="#">
+      <i class="fa fa-dashboard"></i> <span>Billing System</span>
+      <span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i>
+      </span>
+    </a>
+    <ul class="treeview-menu">
+      <li><a href="."><i class="fa fa-circle-o"></i> Invoice Level</a></li>
+      <li><a href="../../index2.html"><i class="fa fa-circle-o"></i> Package Level</a></li>
+    </ul>
+  </li>
+
+  <li class="header">Authentication & Authorization DEMO</li>
+  <li class="header">ABOUT THIS PROJECT</li>
+  <li><a href="#"><i class="fa fa-circle-o text-aqua"></i> <span>Creator</span></a></li>
+</ul>
