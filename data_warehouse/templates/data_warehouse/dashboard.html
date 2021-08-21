@@ -106,43 +106,31 @@
                     </div>
                   </div>
                 </div>
-                <div class="panel box box-danger">
+                <div class="panel box box-primary">
                   <div class="box-header with-border">
                     <h4 class="box-title">
                       <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-                        Collapsible Group Danger
+                        Mechanism
                       </a>
                     </h4>
                   </div>
                   <div id="collapseTwo" class="panel-collapse collapse">
                     <div class="box-body">
-                      Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
-                      wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
-                      eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
-                      assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred
-                      nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
-                      farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
-                      labore sustainable VHS.
+                      TBD
                     </div>
                   </div>
                 </div>
-                <div class="panel box box-success">
+                <div class="panel box box-primary">
                   <div class="box-header with-border">
                     <h4 class="box-title">
                       <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-                        Collapsible Group Success
+                        Future Improvement
                       </a>
                     </h4>
                   </div>
                   <div id="collapseThree" class="panel-collapse collapse">
                     <div class="box-body">
-                      Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
-                      wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
-                      eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
-                      assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred
-                      nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
-                      farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
-                      labore sustainable VHS.
+                      TBD
                     </div>
                   </div>
                 </div>
@@ -155,15 +143,14 @@
         <div class="col-md-3">
           <div class="nav-tabs-custom">
             <ul class="nav nav-tabs pull-right">
-              <li><a href="#tab_1-1" data-toggle="tab">Reset</a></li>
-              <li><a href="#tab_2-2" data-toggle="tab">Step 2</a></li>
-              <li class="active"><a href="#tab_3-2" data-toggle="tab">Step 1</a></li>
+              <li class="{% if reset %}active{% endif %}"><a href="#tab_1-1" data-toggle="tab">Reset</a></li>
+              <li class="{% if step2 %}active{% endif %}"><a href="#tab_2-2" data-toggle="tab">Step 2</a></li>
+              <li class="{% if step1 %}active{% endif %}"><a href="#tab_3-2" data-toggle="tab">Step 1</a></li>
               <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                   Dropdown <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                  <li role="presentation"><a role="menuitem" tabindex="-1" href="#">TBD</a></li>
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="#">TBD</a></li>
                   <li role="presentation" class="divider"></li>
                   <li role="presentation"><a role="menuitem" tabindex="-1" href="#">TBD</a></li>
@@ -184,7 +171,7 @@
               <div class="tab-pane" id="tab_2-2">
                 {% err_msg messages %}
                 <b>How to use:</b>
-                <p>Please upload the two files here</p>
+                <p>Please upload the two files from step 1</p>
                 <div class="form-group">
                   <form method="post" action="{% url 'data_warehouse:csv_uploader' %}" enctype="multipart/form-data">
                     {% csrf_token %}
@@ -201,7 +188,7 @@
               <div class="tab-pane" id="tab_1-1">
                 <div class="callout callout-danger" style="padding: 7px">
                   <h4>Danger Zone</h4>
-                  <p>This button will clear the database. After done so, you can repeat step 1</p>
+                  <p>This button will erase all database. After done so, you can repeat from step 1</p>
                 </div>
                 {% err_msg messages %}
                 <form method="post" action="{% url 'data_warehouse:reset' %}">
