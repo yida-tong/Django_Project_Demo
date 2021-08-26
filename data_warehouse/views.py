@@ -4,9 +4,12 @@ import requests
 import datetime
 import decimal
 import random
+import json
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.contrib import messages
+from django.db.models import F, Value, CharField
+from django.db.models.functions import Concat
 from .models import *
 
 
@@ -114,6 +117,52 @@ def reset(request):
         return HttpResponseBadRequest()
 
 
+def shipment_import(request):
+    if request.is_ajax() and request.method == 'POST':
+        pg_filter = {'is_imported': False}
+        for k, v in request.POST.items():
+            if k == 'submit':
+                continue
+
+            if k == 'fromShipDate':
+                if v:
+                    pg_filter['ShipDate__gte'] = datetime.datetime.strptime(v, '%Y-%m-%d').date()
+                continue
+
+            if k == 'toShipDate':
+                if v:
+                    pg_filter['ShipDate__lte'] = datetime.datetime.strptime(v, '%Y-%m-%d').date()
+                continue
+
+            v = json.loads(v)
+            if k == 'payer':
+                if v:
+                    pg_filter[k + '__id__in'] = map(int, v)
+                continue
+
+            if v or v is False:
+                pg_filter[k + '__in'] = v
+        print(pg_filter)
+        queryset = Shipment.objects.select_related('Payer').filter(**pg_filter)
+        if request.POST['submit'] == 'true':
+            return JsonResponse({'total': 'successful submit!'}, safe=False)
+        else:
+            total = queryset.count()
+            return JsonResponse({'total': total}, safe=False)
+    else:
+        queryset = Shipment.objects.select_related('Payer').filter(is_imported=False)
+        context_dict = {
+            'payerOption': json.dumps(list(queryset.distinct('payer__id').values(name=Concat(F('payer__first_name'), Value(' '), F('payer__last_name'), output_field=CharField()), ids=F('payer__id')))),
+            'serviceOption': json.dumps(list(queryset.distinct('service_type').values_list('service_type', flat=True))),
+            'statusOption': json.dumps(list(queryset.distinct('status').values_list('status', flat=True))),
+            'shipperCityOption': json.dumps(list(queryset.distinct('ShipperCity').values_list('ShipperCity', flat=True))),
+            'shipperStateOption': json.dumps(list(queryset.distinct('ShipperState').values_list('ShipperState', flat=True))),
+            'shipperZipOption': json.dumps(list(queryset.distinct('ShipperZip').values_list('ShipperZip', flat=True))),
+            'recipientCityOption': json.dumps(list(queryset.distinct('RecipientCity').values_list('RecipientCity', flat=True))),
+            'recipientStateOption': json.dumps(list(queryset.distinct('RecipientState').values_list('RecipientState', flat=True))),
+            'recipientZipOption': json.dumps(list(queryset.distinct('RecipientZip').values_list('RecipientZip', flat=True)))
+        }
+    return render(request, 'data_warehouse/import_shipments.html', context_dict)
 
 
 #
@@ -121,12 +170,7 @@ def reset(request):
 #     return
 #
 #
-# def import_shipment(request):
-#     # calculate base rate based on delivery distance, weight, and service type
-#
-#
-#     return
-#
+
 #
 # def apply_surcharge(request):
 #     return

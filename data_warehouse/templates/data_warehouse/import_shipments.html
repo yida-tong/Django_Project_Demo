@@ -1,0 +1,419 @@
+{% extends 'mysite/base.html' %}
+
+{% load static %}
+{% block extra_template_tag %}{% load extra_tags %}{% endblock %}
+{% block sidebar %}{% home_sidebar request %}{% endblock %}
+
+{% block title %}Data Warehouse - Shipment Import Wizard{% endblock %}
+{% block content_header %}Data Warehouse - Shipment Import Wizard{% endblock %}
+
+{% block breadcrumb_menu %}
+  <ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i>Data Warehouse</a></li>
+    <li><a href="#">Shipment Import</a></li>
+    <li class="active">User Wizard</li>
+  </ol>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'select2/select2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">
+  <style>
+    .datepicker {
+      z-index: 9999 !important;
+    }
+  </style>
+{% endblock %}
+
+
+{% block banner %}
+{% endblock %}
+
+{% block main_content %}
+    <div id="app">
+        {% verbatim %}
+        <div v-show="step === 1">
+          <div class="box box-primary">
+              <div class="box-header with-border">
+                <h3 class="box-title">Basic Information (Step 1 / 3)</h3>
+              </div>
+              <div class="box-body">
+                <div class="row form-group">
+                  <div class="col-sm-12">
+                      <h4>Select ShipDate range</h4>
+                  </div>
+                  <div class="col-md-6 col-sm-12">
+                      <label for="from_date">From ShipDate: </label>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right datepicker" v-model="fromShipDate" id="from_date">
+                      </div>
+                  </div>
+                  <div class="col-md-6 col-sm-12">
+                      <label for="to_date">To ShipDate: </label>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right datepicker" v-model="toShipDate" id="to_date">
+                      </div>
+                  </div>
+                </div>
+
+                <div class="row form-group">
+                  <div class="col-sm-12">
+                      <h4>Select Payers</h4>
+                  </div>
+                  <div class="col-md-6 col-sm-12">
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-user"></i>
+                        </div>
+                        <select class="form-control pull-right select2" multiple="multiple" v-model="payers" style="width: 100%;" id="select_payers">
+                          <option v-for="payer in payerOption" :value="payer.ids">{{ payer.name }}</option>
+                        </select>
+                      </div>
+                  </div>
+                </div>
+
+                <div class="row form-group">
+                  <div class="col-sm-12">
+                      <h4>Bulk Tracking Number Upload</h4>
+                  </div>
+                  <div class="col-md-6 col-sm-12">
+                    <div class="input-group date">
+                      <div class="input-group-addon">
+                        <i class="fa fa-file-zip-o"></i>
+                      </div>
+                      <input type="file" class="form-control pull-right" style="width: 100%;" id="csv_file">
+                    </div>
+                    <br>
+                    <div style="display: block">
+                      <button class="btn btn-primary" @click="loadTrackingNumber()">Upload CSV</button>
+                      <button class="btn btn-primary" @click="removeTrackingNumber()">Delete CSV</button>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-sm-12">
+                       <ul>
+                          <li>First Tracking Number: {{ trackingNumbers[0] }}</li>
+                          <li>Last Tracking Number: {{ trackingNumbers[trackingNumbers.length-1] }}</li>
+                          <li>Number of Tracking Number: {{ trackingNumbers.length }}</li>
+                        </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="box-footer clearfix">
+                <a class="btn btn-info btn-flat pull-right" @click="getShipment(1)">Next</a>
+                <a class="btn btn-info btn-flat pull-right" disabled>Previous</a>
+                <a class="btn btn-info btn-flat pull-right" href=".">Cancel</a>
+              </div>
+          </div>
+        </div>
+
+        <div v-show="step === 2">
+          <div class="box box-primary">
+              <div class="box-header with-border">
+                <h3 class="box-title">More Information (Step 2 / 3)</h3>
+              </div>
+              <div class="box-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="alert alert-success" style="padding: 7px; margin-bottom: 5px">
+                            {{ currCount }} shipments affected by your current selections.
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                  <div class="col-md-6 col-sm-12">
+                      <h4>Service Type</h4>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-user"></i>
+                        </div>
+                        <select class="form-control pull-right select2" multiple="multiple" v-model="serviceType" style="width: 100%;" id="select_service_type">
+                          <option v-for="service in serviceOption" :value="service">{{ service }}</option>
+                        </select>
+                      </div>
+                  </div>
+
+                  <div class="col-md-6 col-sm-12">
+                      <h4>Shipment Status</h4>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-user"></i>
+                        </div>
+                        <select class="form-control pull-right select2" multiple="multiple" v-model="serviceStatus" style="width: 100%;" id="select_shipment_status">
+                          <option v-for="status in statusOption" :value="status">{{ status }}</option>
+                        </select>
+                      </div>
+                  </div>
+                </div>
+
+                <div class="row form-group">
+                  <div class="col-sm-12">
+                      <h4>About Shipper</h4>
+                  </div>
+                  <div class="col-md-4 col-sm-12">
+                      <label for="shipper_city">Shipper City</label>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-user"></i>
+                        </div>
+                        <select class="form-control pull-right select2" multiple="multiple" v-model="shipperCity" style="width: 100%;" id="shipper_city">
+                          <option v-for="shipper_city in shipperCityOption" :value="shipper_city">{{ shipper_city }}</option>
+                        </select>
+                      </div>
+                  </div>
+                  <div class="col-md-4 col-sm-12">
+                      <label for="shipper_state">Shipper State</label>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-user"></i>
+                        </div>
+                        <select class="form-control pull-right select2" multiple="multiple" v-model="shipperState" style="width: 100%;" id="shipper_state">
+                          <option v-for="shipper_state in shipperStateOption" :value="shipper_state">{{ shipper_state }}</option>
+                        </select>
+                      </div>
+                  </div>
+                  <div class="col-md-4 col-sm-12">
+                      <label for="shipper_zip">Shipper Zip</label>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-user"></i>
+                        </div>
+                        <select class="form-control pull-right select2" multiple="multiple" v-model="shipperZip" style="width: 100%;" id="shipper_zip">
+                          <option v-for="shipper_zip in shipperZipOption" :value="shipper_zip">{{ shipper_zip }}</option>
+                        </select>
+                      </div>
+                  </div>
+                </div>
+
+                <div class="row form-group">
+                  <div class="col-sm-12">
+                      <h4>About Recipient</h4>
+                  </div>
+                  <div class="col-md-4 col-sm-12">
+                      <label for="recipient_city">Recipient City</label>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-user"></i>
+                        </div>
+                        <select class="form-control pull-right select2" multiple="multiple" v-model="recipientCity" style="width: 100%;" id="recipient_city">
+                          <option v-for="recipient_city in recipientCityOption" :value="recipient_city">{{ recipient_city }}</option>
+                        </select>
+                      </div>
+                  </div>
+                  <div class="col-md-4 col-sm-12">
+                      <label for="recipient_state">Recipient State</label>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-user"></i>
+                        </div>
+                        <select class="form-control pull-right select2" multiple="multiple" v-model="recipientState" style="width: 100%;" id="recipient_state">
+                          <option v-for="recipient_state in recipientStateOption" :value="recipient_state">{{ recipient_state }}</option>
+                        </select>
+                      </div>
+                  </div>
+                  <div class="col-md-4 col-sm-12">
+                      <label for="recipient_zip">Recipient Zip</label>
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-user"></i>
+                        </div>
+                        <select class="form-control pull-right select2" multiple="multiple" v-model="recipientZip" style="width: 100%;" id="recipient_zip">
+                          <option v-for="recipient_zip in recipientZipOption" :value="recipient_zip">{{ recipient_zip }}</option>
+                        </select>
+                      </div>
+                  </div>
+                </div>
+              </div>
+              <div class="box-footer clearfix">
+                <a class="btn btn-info btn-flat pull-right" @click="getShipment(2)">Next</a>
+                <a class="btn btn-info btn-flat pull-right" @click="step--">Previous</a>
+                <a class="btn btn-info btn-flat pull-right" href=".">Cancel</a>
+              </div>
+          </div>
+        </div>
+        {% endverbatim %}
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/vue/vue.js' %}"></script>
+  <script src="{% static 'js/sweetalert/sweetalert.min.js' %}"></script>
+  <script src="{% static 'select2/select2.min.js' %}"></script>
+  <script src="{% static 'bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
+  <script>
+    $(function () {
+      $('.select2').select2(
+          {templateSelection: function (data) {
+              return $('<span style="color: black">'+data.text+'</span>')
+              }}
+      );
+      $('.datepicker').datepicker({
+        autoclose: true,
+        format: 'yyyy-mm-dd',
+      });
+      $.ajaxSetup({
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+        }
+    });
+    })
+  </script>
+  <script>
+    var app = new Vue ({
+      el: '#app',
+      data: {
+          // inputs
+          step: 1,
+          currCount: 0,
+          fromShipDate: '',
+          toShipDate: '',
+          payers: [],
+          trackingNumbers: [],
+          serviceType: [],
+          serviceStatus: [],
+          shipperCity: [],
+          shipperState: [],
+          shipperZip: [],
+          recipientCity: [],
+          recipientState: [],
+          recipientZip: [],
+          // options
+          payerOption: {{ payerOption | safe }},
+          serviceOption: {{ serviceOption | safe }},
+          statusOption: {{ statusOption | safe }},
+          shipperCityOption: {{ shipperCityOption | safe }},
+          shipperStateOption: {{ shipperStateOption | safe }},
+          shipperZipOption: {{ shipperZipOption | safe }},
+          recipientCityOption: {{ recipientCityOption | safe }},
+          recipientStateOption: {{ recipientStateOption | safe }},
+          recipientZipOption: {{ recipientZipOption | safe }}
+      },
+      mounted () {
+          var app = this;
+          $('#from_date').on('change', function (event) {
+            app.fromShipDate = $('#from_date').val()
+          });
+          $('#to_date').on('change', function (event) {
+            app.toShipDate = $('#to_date').val()
+          });
+          $('#select_payers').on('change', function (event) {
+            app.payers = $('#select_payers').val()
+          });
+          $('#select_service_type').on('change', function (event) {
+            app.serviceType = $('#select_service_type').val()
+          });
+          $('#select_shipment_status').on('change', function (event) {
+            app.serviceStatus = $('#select_shipment_status').val()
+          });
+          $('#shipper_city').on('change', function (event) {
+            app.shipperCity = $('#shipper_city').val()
+          });
+          $('#shipper_state').on('change', function (event) {
+            app.shipperState = $('#shipper_state').val()
+          });
+          $('#shipper_zip').on('change', function (event) {
+            app.shipperZip = $('#shipper_zip').val()
+          });
+          $('#recipient_city').on('change', function (event) {
+            app.recipientCity = $('#recipient_city').val()
+          });
+          $('#recipient_state').on('change', function (event) {
+            app.recipientState = $('#recipient_state').val()
+          });
+          $('#recipient_zip').on('change', function (event) {
+            app.recipientZip = $('#recipient_zip').val()
+          });
+      },
+      methods: {
+          loadTrackingNumber: function () {
+            var reader = new FileReader();
+            var file = document.getElementById('csv_file').files[0];
+            var tem = [];
+            reader.readAsText(file, 'UTF-8');
+            reader.onload = function () {
+                var content = reader.result;
+                var csv_list;
+                if (content.includes('\r')) {
+                    csv_list = content.split('\r\n');
+                } else {
+                    csv_list = content.split('\n');
+                }
+                for (let i=0; i < csv_list.length; i++) {
+                    if (csv_list[i].length > 1) {
+                        tem.push(csv_list[i])
+                    }
+                }
+            };
+            this.trackingNumbers = tem
+          },
+          removeTrackingNumber: function() {
+              this.trackingNumbers = []
+          },
+          getShipment: function (step) {
+              this.step = step;
+              let base_filter = {
+                  submit: false,
+                  fromShipDate: this.fromShipDate,
+                  toShipDate: this.toShipDate,
+                  payer: JSON.stringify(this.payers),
+                  TrackingNum: JSON.stringify(this.trackingNumbers),
+              };
+              var query;
+              if (this.step === 1) {
+                  query = base_filter;
+              } else {
+                  query = {
+                    ...base_filter,
+                    service_type: JSON.stringify(this.serviceType),
+                    status: JSON.stringify(this.serviceStatus),
+                    ShipperCity: JSON.stringify(this.shipperCity),
+                    ShipperState: JSON.stringify(this.shipperState),
+                    ShipperZip: JSON.stringify(this.shipperZip),
+                    RecipientCity: JSON.stringify(this.recipientCity),
+                    RecipientState: JSON.stringify(this.recipientState),
+                    RecipientZip: JSON.stringify(this.recipientZip),
+                  }
+              }
+              $.post('.', query).done(data => {
+                  this.currCount = data.total;
+                  this.step ++;
+
+              }).fail(e => {
+                  console.log(e);
+                  swal("Error", e, "error");
+              })
+          },
+          submission: function () {
+            var data = {
+                  submit: true,
+                  fromShipDate: this.fromShipDate,
+                  toShipDate: this.toShipDate,
+                  payer: JSON.stringify(this.payers),
+                  TrackingNum: JSON.stringify(this.trackingNumbers),
+                  service_type: JSON.stringify(this.serviceType),
+                  status: JSON.stringify(this.serviceStatus),
+                  ShipperCity: JSON.stringify(this.shipperCity),
+                  ShipperState: JSON.stringify(this.shipperState),
+                  ShipperZip: JSON.stringify(this.shipperZip),
+                  RecipientCity: JSON.stringify(this.recipientCity),
+                  RecipientState: JSON.stringify(this.recipientState),
+                  RecipientZip: JSON.stringify(this.recipientZip),
+            };
+            $.post('.', data).done(data => {
+                    swal("Success", data.total, "success");
+                }
+            ).fail(
+                e => {
+                    console.log(e);
+                    swal("Error", e, "error");
+                })
+          }
+      }
+    })
+  </script>
+{% endblock %}
