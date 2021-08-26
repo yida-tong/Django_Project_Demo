@@ -22,6 +22,11 @@
     .datepicker {
       z-index: 9999 !important;
     }
+  .badge {
+      white-space: normal;
+      padding: 5px;
+      margin: 3px;
+  }
   </style>
 {% endblock %}
 
@@ -234,6 +239,140 @@
                 <a class="btn btn-info btn-flat pull-right" @click="step--">Previous</a>
                 <a class="btn btn-info btn-flat pull-right" href=".">Cancel</a>
               </div>
+          </div>
+        </div>
+
+        <div v-show="step === 3">
+          <div class="box box-primary">
+              <div class="box-header with-border">
+                <h3 class="box-title">Summary Page (Step 3 / 3)</h3>
+              </div>
+              <div class="box-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="alert alert-success" style="padding: 7px; margin-bottom: 5px">
+                            {{ currCount }} shipments affected by your current selections.
+                        </div>
+                    </div>
+                </div>
+
+                <h4>Step 1</h4>
+                <div class="row text-center">
+                  <div class="col-md-6 col-sm-12" v-if="!!fromShipDate">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Ship Date From: </p>
+                        <span class="badge">{{ fromShipDate }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-sm-12" v-if="!!toShipDate">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Ship Date To:</p>
+                        <span class="badge">{{ toShipDate }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-12 col-sm-12" v-if="payers.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Payers:</p>
+                        <span class="badge" v-for="payer in payers">{{ payer }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-12 col-sm-12" v-if="trackingNumbers.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Tracking Numbers: </p>
+                        <ul>
+                          <li>First Tracking Number: {{ trackingNumbers[0] }}</li>
+                          <li>Last Tracking Number: {{ trackingNumbers[trackingNumbers.length-1] }}</li>
+                          <li>Number of Tracking Number: {{ trackingNumbers.length }}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h4>Step 2</h4>
+                <div class="row text-center">
+                  <div class="col-md-6 col-sm-12" v-if="serviceType.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Service Type: </p>
+                        <span class="badge" v-for="stype in serviceType">{{ stype }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-sm-12" v-if="serviceStatus.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Shipping Status:</p>
+                        <span class="badge" v-for="status in serviceStatus">{{ status }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 col-sm-12" v-if="shipperCity.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Shipper City:</p>
+                        <span class="badge" v-for="city in shipperCity">{{ city }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4 col-sm-12" v-if="shipperState.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Shipper State:</p>
+                        <span class="badge" v-for="state in shipperState">{{ state }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4 col-sm-12" v-if="shipperZip.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Shipper Zip:</p>
+                        <span class="badge" v-for="zip in shipperZip">{{ zip }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4 col-sm-12" v-if="recipientCity.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Recipient City:</p>
+                        <span class="badge" v-for="city in recipientCity">{{ city }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4 col-sm-12" v-if="recipientState.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Recipient State:</p>
+                        <span class="badge" v-for="state in recipientState">{{ state }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 col-sm-12" v-if="recipientZip.length !==0">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Recipient Zip:</p>
+                        <span class="badge" v-for="zip in recipientZip">{{ zip }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          </div>
+          <div class="box-footer clearfix">
+            <a class="btn btn-success btn-flat pull-right" @click="submission">Finish</a>
+            <a class="btn btn-info btn-flat pull-right" disabled>Next</a>
+            <a class="btn btn-info btn-flat pull-right" @click="step--">Previous</a>
+            <a class="btn btn-info btn-flat pull-right" href=".">Cancel</a>
           </div>
         </div>
         {% endverbatim %}
