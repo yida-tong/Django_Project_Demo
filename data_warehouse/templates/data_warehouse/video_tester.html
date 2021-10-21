@@ -1,0 +1,351 @@
+{% extends 'mysite/base.html' %}
+
+{% load static %}
+{% block extra_template_tag %}{% load extra_tags %}{% endblock %}
+{% block sidebar %}{% home_sidebar request %}{% endblock %}
+
+{% block title %}Video Player Demo{% endblock %}
+{% block content_header %}Demo - Video Player{% endblock %}
+
+{% block breadcrumb_menu %}
+  <ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i> Demo</a></li>
+    <li><a href="#">Demo Task</a></li>
+    <li class="active">Video Player</li>
+  </ol>
+{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block main_content %}
+  <div class="box box-default">
+    <div class="box-header with-border">
+      <h3 class="box-title">Player</h3>
+      <div class="box-tools pull-right">
+        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="box-body" style="">
+      <video id="v-1" style="border: 1px solid grey;" class="center-block" controls></video>
+    </div>
+  </div>
+
+  <div class="box box-default">
+    <div class="box-header with-border">
+      <h3 class="box-title">Console</h3>
+    </div>
+
+    <div class="box-body" style="">
+      <div class="row">
+        <div class="col-lg-12 col-md-12">
+          <textarea cols="100" rows="5" style="overflow:scroll;" id="console_out_2">[friendly reminder]Visibility Console.</textarea>
+        </div>
+        <div class="col-lg-12 col-md-12">
+          <textarea cols="100" rows="5" style="overflow:scroll;" id="console_out">[friendly reminder]Default window size is initialized as 600*300px.</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-primary">
+      <div class="box-header with-border">
+        <h3 class="box-title">Control Area</h3>
+      </div>
+    <!-- /.box-header -->
+    <!-- form start -->
+      <div class="box-body">
+        <div class="row">
+          <div class="col-lg-3 col-md-3">
+            <div class="form-group">
+              <input type="text" class="form-control" id="url_input" placeholder="Enter URL" style="margin-bottom: 5px" value="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4">
+              <button class="btn btn-primary" onclick="load_url()">Load URL</button>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-3">
+            <div class="form-group">
+              <div class="row" style="margin-bottom: 5px">
+                <div class="col-xs-6">
+                  <input type="text" class="form-control" id="width_input" placeholder="Enter Width">
+                </div>
+                <div class="col-xs-6">
+                  <input type="text" class="form-control" id="height_input" placeholder="Enter Height">
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="resize_video()">Resize</button>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-3">
+            <div class="form-group">
+              <input type="text" class="form-control" id="autoplay_input" placeholder="true or false. Then refresh page and reload url" style="margin-bottom: 5px">
+              <button class="btn btn-primary" onclick="set_autoplay_video()">setAutoplay</button>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-3">
+            <div class="form-group">
+              <input type="text" class="form-control" id="volume_input" placeholder="0~100" style="margin-bottom: 5px">
+              <button class="btn btn-primary" onclick="set_volume_video()">setVolume</button>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-3">
+            <div class="form-group">
+              <input type="text" class="form-control" id="mute_input" placeholder="true or false" style="margin-bottom: 5px">
+              <button class="btn btn-primary" onclick="set_muted_video()">setMute</button>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-3">
+            <div class="form-group">
+              <input type="text" class="form-control" id="fullscreen_input" placeholder="true or false" style="margin-bottom: 5px">
+              <button class="btn btn-primary" onclick="set_fullscreen_video()">setFullscreen</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /.box-body -->
+      <div class="box-footer">
+          <div class="btn-group">
+              <button class="btn btn-primary" onclick="play_video()">Play</button>
+              <button class="btn btn-primary" onclick="pause_video()">Pause</button>
+              <button class="btn btn-primary" onclick="get_height()">getHeight</button>
+              <button class="btn btn-primary" onclick="get_width()">getWidth</button>
+              <button class="btn btn-primary" onclick="get_volume_video()">getVolume</button>
+              <button class="btn btn-primary" onclick="get_muted_video()">getMute</button>
+              <button class="btn btn-primary" onclick="get_duration_video()">getDuration</button>
+              <button class="btn btn-primary" onclick="get_playback_video()">getPlaybackState</button>
+          </div>
+      </div>
+  </div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+  // src code (api)
+  class Player {
+      // Instance Variable
+      // Representation Invariant: 1. volume are integers ranges between 0 ~ 100
+      // Standard way should add a validation function each method before return to check if state of Representation Invariant holds.
+      #element;
+      #width;
+      #height;
+      #volume=50;
+      #is_mute=false;
+      #oberver;
+      #callback;
+      #visibility_ratio;
+
+      constructor(divId, width, height) {
+          this.#width = width;
+          this.#height = height;
+          this.#element = document.getElementById(divId);
+          this.#element.width = this.#width;
+          this.#element.height = this.#height;
+          this.#element.volume = this.#volume/100;
+
+          let options = {
+            root: null,
+            rootMargin: '0px',
+            threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+          };
+
+          this.#callback = (entries, observer) => {
+              entries.forEach(entry => {
+                this.#visibility_ratio = entry.intersectionRatio*100;
+              });
+          };
+
+          this.#oberver = new IntersectionObserver(this.#callback, options);
+          this.#oberver.observe(this.#element);
+
+          // retrieve autoplay attribute from localstorage. Player object is erased once page is refreshed. I believe it is appropriate to store autoplay property at local storage.
+          if (localStorage.getItem("autoplay") === "true") {
+            this.#element.autoplay = true;
+          }
+      }
+
+      // Accessor
+      getHeight() {
+        return this.#height;
+      }
+
+      getWidth() {
+        return this.#width;
+      }
+
+      getVolume() {
+        return this.#volume;
+      }
+
+      getMute() {
+        return this.#is_mute;
+      }
+
+      getDuration() {
+        return this.#element.duration;
+      }
+
+      getPlaybackState() {
+          if (this.#element.ended) {
+              return "ended";
+          } else if (this.#element.paused) {
+              return "paused";
+          } else {
+              return "playing";
+          }
+      }
+
+      getViewability() {
+          return this.#visibility_ratio;
+      }
+
+      // Mutator
+      load(url) {
+          this.#element.src = url;
+      }
+
+      play() {
+          this.#element.play();
+      }
+
+      Pause() {
+          this.#element.pause();
+      }
+
+      resize(width, height) {
+          if (width) {
+            this.#width = width;
+          }
+          if (height) {
+            this.#height = height;
+          }
+          this.#element.width = this.#width;
+          this.#element.height = this.#height;
+      }
+
+      setAutoplay(autoplay) {
+          if (autoplay) {
+              localStorage.setItem('autoplay', 'true');
+              this.#element.autoplay = true;
+          } else {
+              localStorage.removeItem('autoplay');
+              this.#element.removeAttribute("autoplay");
+          }
+      }
+
+      setVolume(volume) {
+          this.#volume = volume;
+          this.#element.volume = this.#volume/100;
+      }
+
+      setMute(mute) {
+          this.#is_mute = mute;
+          this.#element.muted = this.#is_mute;
+      }
+
+      setFullscreen(fullscreen) {
+          if (fullscreen) {
+            this.#element.requestFullscreen();
+          } else {
+            document.exitFullscreen();
+          }
+      }
+  }
+</script>
+
+<script>
+  // test code
+  let player_object = new Player("v-1", 600, 300);
+
+  function load_url() {
+      player_object.load($('#url_input').val());
+  }
+
+  function resize_video() {
+      player_object.resize($('#width_input').val(), $('#height_input').val());
+  }
+
+  function get_height() {
+      var text_area = document.getElementById("console_out");
+      text_area.value += "\n[" + new Date() + "]" + " get_height " + player_object.getHeight();
+      text_area.scrollTop = text_area.scrollHeight;
+  }
+
+  function get_width() {
+      var text_area = document.getElementById("console_out");
+      text_area.value += "\n[" + new Date() + "]" + " get_width " + player_object.getWidth();
+      text_area.scrollTop = text_area.scrollHeight;
+  }
+
+  function play_video() {
+      player_object.play();
+  }
+
+  function pause_video() {
+      player_object.Pause();
+  }
+
+  function set_autoplay_video() {
+      if ($('#autoplay_input').val() === "true") {
+        player_object.setAutoplay(true);
+      } else {
+        player_object.setAutoplay(false);
+      }
+  }
+
+  function set_volume_video() {
+      player_object.setVolume($('#volume_input').val());
+  }
+
+  function get_volume_video() {
+      var text_area = document.getElementById("console_out");
+      text_area.value += "\n[" + new Date() + "]" + " get_volume " + player_object.getVolume();
+      text_area.scrollTop = text_area.scrollHeight;
+  }
+
+  function set_muted_video() {
+      if ($('#mute_input').val() === "true") {
+        player_object.setMute(true);
+      } else {
+        player_object.setMute(false);
+      }
+  }
+
+  function get_muted_video() {
+      var text_area = document.getElementById("console_out");
+      text_area.value += "\n[" + new Date() + "]" + " get_muted " + player_object.getMute();
+      text_area.scrollTop = text_area.scrollHeight;
+  }
+
+  function get_duration_video() {
+      var text_area = document.getElementById("console_out");
+      text_area.value += "\n[" + new Date() + "]" + " get_duration (sec) " + player_object.getDuration();
+      text_area.scrollTop = text_area.scrollHeight;
+  }
+
+  function set_fullscreen_video() {
+      if ($('#fullscreen_input').val() === "true") {
+        player_object.setFullscreen(true);
+      } else {
+        player_object.setFullscreen(false);
+      }
+  }
+
+  function get_playback_video() {
+      var text_area = document.getElementById("console_out");
+      text_area.value += "\n[" + new Date() + "]" + " get_playback_state " + player_object.getPlaybackState();
+      text_area.scrollTop = text_area.scrollHeight;
+  }
+
+  document.addEventListener('scroll', function(e) {
+    var text_area = document.getElementById("console_out_2");
+    text_area.value += "\n[" + new Date() + "]" + " visibility ratio: " + player_object.getViewability();
+    text_area.scrollTop = text_area.scrollHeight;
+  });
+</script>
+{% endblock %}

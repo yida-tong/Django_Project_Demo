@@ -181,3 +181,8 @@ def shipment_import(request):
 #     return
 #
 #
+
+
+def video_player(request):
+    context_dict = {}
+    return render(request, 'data_warehouse/video_tester.html', context_dict)
