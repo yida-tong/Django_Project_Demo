@@ -1,4 +1,4 @@
-# django-qualified
+# django-project-demo
 The objective of this project is to demonstrate my skills in web development using django and system design
 
 ### Dependencies
