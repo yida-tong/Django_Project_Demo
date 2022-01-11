@@ -1,0 +1,117 @@
+{% extends 'mysite/base.html' %}
+
+{% load static %}
+{% block extra_template_tag %}{% load extra_tags %}{% endblock %}
+{% block sidebar %}{% home_sidebar request %}{% endblock %}
+
+{% block title %}Data Warehouse - Shipments Listing{% endblock %}
+{% block content_header %}Data Warehouse - Shipments Listing{% endblock %}
+{% load render_table from django_tables2 %}
+
+
+{% block breadcrumb_menu %}
+  <ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i> Data Warehouse</a></li>
+    <li class="active">Shipments Listing</li>
+  </ol>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">
+  <style>
+    .overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255,255,255,0.8);
+      z-index: 5000;
+      text-align: center;
+      padding-top: 20%;
+    }
+    .overlay i {
+      font-size: 80px;
+    }
+  </style>
+{% endblock %}
+
+
+{% block main_content %}
+  <div class="overlay">
+    <h1>Processing...</h1><br>
+    <i class="fa fa-refresh fa-spin"></i>
+  </div>
+
+  {% err_msg messages %}
+    <div class="box box-solid">
+      <div class="box-body">
+        <form class="form" method="GET" action="{% url 'data_warehouse:shipment_search' %}">
+          <div class="row">
+            {% for each in form %}
+              <div class="col-lg-3 col-md-3">
+                <div class="form-group">
+                  <em class="text-red">{{ each.errors }}</em>
+                  <label for="{{ each.id_for_label }}">{{ each.label }}</label>
+                  {% if each.help_text %}
+                    <sup class="badge badge-dark" data-toggle="tooltip" data-placement="top" title="{{ each.help_text }}"><i class="fas fa-info"></i></sup>
+                  {% endif %}
+                  {{ each }}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          <button id="Search" type="submit" class="btn btn-primary" name="action" value="search">Search</button>
+          <button type="submit" class="btn btn-primary" name="action" value="download-as-csv">Download as csv</button>
+        </form>
+      </div>
+    </div>
+
+    {% if table %}
+      <div class="box box-solid">
+        <div class="box-header">
+          <h2 class="box-title">Data Table</h2>
+        </div>
+        <div class="box-body">
+          {% if filter_msg %}
+            <div id="filter-bar">
+              <strong>{{ total_shipments }}</strong> total shipments returned for
+              {% for key, value in filter_msg.items %}
+                  {% if forloop.counter == filter_msg|length %}
+                      {{ key }}: "<strong>{{ value }}</strong>"
+                  {% else %}
+                      {{ key }}: "<strong>{{ value }}</strong>",
+                  {% endif %}
+              {% endfor %}
+            </div>
+            <br>
+          {% endif %}
+          {% render_table table %}
+        </div>
+      </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
+  <script>
+    $(document).ready(function () {
+      $('.datepicker').datepicker({
+        autoclose: true,
+        format: 'yyyy-mm-dd',
+      });
+      function ShowLoading() {
+          $(".overlay").show();
+      }
+      $("#Search").on("click", ShowLoading)
+
+    })
+  </script>
+  <script>
+      $(document).ready(function () {
+          $("th.asc").append("<br><span class ='glyphicon glyphicon-sort-by-attributes' style='color:#3c8dbc'></span>");
+          $("th.desc").append("<br><span class ='glyphicon glyphicon-sort-by-attributes-alt' style='color:#3c8dbc'></span>");
+      })
+  </script>
+{% endblock %}

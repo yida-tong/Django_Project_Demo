@@ -2,6 +2,7 @@ asgiref==3.4.1
 certifi==2021.5.30
 charset-normalizer==2.0.4
 Django==3.2.6
+django-tables2==2.4.1
 gunicorn==20.1.0
 idna==3.2
 psycopg2-binary==2.9.1

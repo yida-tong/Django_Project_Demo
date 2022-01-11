@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mysite',
-    'data_warehouse'
+    'data_warehouse',
+    'django_tables2'
 ]
 
 MIDDLEWARE = [

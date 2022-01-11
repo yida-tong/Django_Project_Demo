@@ -15,7 +15,7 @@
     </ul>
   </li>
 
-  <li class="treeview">
+  <li class="treeview {% if request.resolver_match.app_name == 'data_warehouse' %}active menu-open{% endif %}">
     <a href="#">
       <i class="fa fa-dashboard"></i> <span>Shipment Tracking</span>
       <span class="pull-right-container">
@@ -23,8 +23,9 @@
       </span>
     </a>
     <ul class="treeview-menu">
-      <li><a href="."><i class="fa fa-circle-o"></i> Dashboard v1</a></li>
-      <li><a href="../../index2.html"><i class="fa fa-circle-o"></i> Dashboard v2</a></li>
+      <li class="{% if request.resolver_match.app_name == 'data_warehouse' and request.path == '/data_warehouse/shipment_search/' %}active{% endif %}"><a href="{% url 'data_warehouse:shipment_search' %}"><i class="fa fa-circle-o"></i>Shipment Listing</a></li>
+{#      <li class="{% if request.resolver_match.app_name == 'data_warehouse' and request.path == '/data_warehouse/shipment_import/' %}active{% endif %}"><a href="{% url 'data_warehouse:shipment_import' %}"><i class="fa fa-circle-o"></i>Shipment Import</a></li>#}
+{#      <li class="{% if request.resolver_match.app_name == 'data_warehouse' and request.path == '/data_warehouse/video_player/' %}active{% endif %}"><a href="{% url 'data_warehouse:video_player' %}"><i class="fa fa-circle-o"></i>Video Player</a></li>#}
     </ul>
   </li>
 

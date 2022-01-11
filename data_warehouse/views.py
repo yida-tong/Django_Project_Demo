@@ -6,11 +6,24 @@ import decimal
 import random
 import json
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, StreamingHttpResponse
 from django.contrib import messages
 from django.db.models import F, Value, CharField
 from django.db.models.functions import Concat
+from django_tables2 import RequestConfig
+
 from .models import *
+from .forms import SearchShipmentForm
+from .tables import ShipmentTable
+
+
+class Echo(object):
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
 
 
 def index(request):
@@ -186,3 +199,121 @@ def shipment_import(request):
 def video_player(request):
     context_dict = {}
     return render(request, 'data_warehouse/video_tester.html', context_dict)
+
+
+def shipment_search(request):
+    context_dic = {
+        'form': SearchShipmentForm,
+        'table': None,
+    }
+    if request.method == 'GET':
+        if request.GET.get('action'):
+            if request.GET['action'] == 'search' or request.GET['action'] == 'download-as-csv':
+                form = SearchShipmentForm(request.GET)
+                context_dic['form'] = form
+                if form.is_valid():
+                    cleaned_form = form.cleaned_data
+                    criteria = dict()
+                    filter_template_dict = dict()
+                    for k, v in cleaned_form.items():
+                        if v or v is False:
+                            criteria[k] = v
+                            filter_template_dict[form.filter_keys_dict[k]] = v
+                    context_dic['filter_msg'] = filter_template_dict if filter_template_dict else {'data': 'all'}
+                    if criteria:
+                        shipments = Shipment.objects.filter(**criteria)
+                    else:
+                        shipments = Shipment.objects.all()
+
+                    if request.GET.get('action') == 'download-as-csv':
+                        if shipments:
+                            headers = [item.verbose_name for item in Shipment._meta.fields]
+                            writer = csv.writer(Echo())
+                            response = StreamingHttpResponse(((writer.writerow(headers) + writer.writerow([
+                                getattr(each, items.name) for items in Shipment._meta.fields
+                            ])) if counter == 0 else writer.writerow([
+                                getattr(each, items.name) for items in Shipment._meta.fields
+                            ]) for counter, each in enumerate(shipments)), content_type='text/csv')
+                            response['Content-Disposition'] = 'attachment; filename="table.csv"'
+                            return response
+                        else:
+                            messages.warning(request, 'No data can be downloaded as csv')
+
+                    context_dic['total_shipments'] = shipments.count()
+                    table = ShipmentTable(shipments)
+                    context_dic['table'] = table
+                    RequestConfig(request, paginate={'per_page': 25}).configure(table)
+                    if request.GET.get('action') == 'search':
+                        messages.success(request, 'found {} shipments'.format(shipments.count()))
+                else:
+                    messages.error(request, 'form is invalid.')
+
+            return render(request, 'data_warehouse/shipment_search.html', context_dic)
+        else:
+            context_dic['filter_msg'] = {'data': 'all'}
+            shipments = Shipment.objects.all()
+            context_dic['total_shipments'] = shipments.count()
+            table = ShipmentTable(shipments)
+            context_dic['table'] = table
+            RequestConfig(request, paginate={'per_page': 50}).configure(table)
+            return render(request, 'data_warehouse/shipment_search.html', context_dic)
+    else:
+        return render(request, 'data_warehouse/shipment_search.html', context_dic)
+
+#
+# def shipment_add(request):
+#     context_dic = {
+#         'form': AddUnitPriceForm()
+#     }
+#     if request.method == 'POST':
+#         form = AddUnitPriceForm(request.POST)
+#         if form.is_valid():
+#             new_unit_price = form.save(commit=False)
+#             new_unit_price.save()
+#             messages.success(request, 'Unit prices have been saved.')
+#             return redirect('peripharma_billing:unit_price_index')
+#         else:
+#             context_dic['form'] = form
+#             messages.error(request, 'form is invalid')
+#     return render(request, 'peripharma_billing/unit_price/add.html', context_dic)
+#
+#
+
+
+# def shipment_update(request, pk):
+#     try:
+#         selected_shipment = Shipment.objects.get(id=pk)
+#     except Shipment.DoesNotExist:
+#         selected_shipment = None
+#     initial = {
+#         'amount': Shipment.amount,
+#         'billing_group': Shipment.billing_group,
+#         'start_date': Shipment.start_date,
+#         'end_date': Shipment.end_date
+#     }
+#     context_dic = {
+#         'form': UpdateUnitPriceForm(initial=initial),
+#         'unit_price': unit_price
+#     }
+#     if unit_price:
+#         if request.method == 'POST':
+#             form = UpdateUnitPriceForm(request.POST, initial=initial, pk=pk)
+#             context_dic['form'] = form
+#             if form.is_valid():
+#                 if form.has_changed():
+#                     cleaned_form = form.cleaned_data
+#                     for each in form.changed_data:
+#                         setattr(unit_price, each, cleaned_form[each])
+#                     try:
+#                         unit_price.save()
+#                         context_dic['form'] = UpdateUnitPriceForm(request.POST, pk=pk)
+#                         messages.success(request, 'unit price has been updated')
+#                     except ValidationError as e:
+#                         messages.error(request, e.messages)
+#                 else:
+#                     messages.info(request, 'nothing has been changed')
+#             else:
+#                 messages.error(request, 'form is invalid')
+#         return render(request, 'peripharma_billing/unit_price/update.html', context_dic)
+#     else:
+#         return HttpResponse('unit price does not exist')
