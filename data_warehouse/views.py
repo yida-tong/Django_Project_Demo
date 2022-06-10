@@ -1,3 +1,4 @@
+from threading import Thread
 import io
 import csv
 import requests
@@ -5,6 +6,11 @@ import datetime
 import decimal
 import random
 import json
+from bs4 import BeautifulSoup
+import pandas as pd
+import spacy
+nlp = spacy.load('en_core_web_sm')
+
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, StreamingHttpResponse
 from django.contrib import messages
@@ -317,3 +323,110 @@ def shipment_search(request):
 #         return render(request, 'peripharma_billing/unit_price/update.html', context_dic)
 #     else:
 #         return HttpResponse('unit price does not exist')
+frame = []
+articleInfo = []
+df = None
+
+totalArticle = 10
+curArticle = 0
+
+
+def aljazeera_scraping():
+    global frame
+    global curArticle
+    global articleInfo
+    frame = []
+    articleInfo = []
+
+    newsURL = "https://www.aljazeera.com/news/"
+    r = requests.get(newsURL)
+    r.encoding = 'utf-8'
+    content = r.content
+    soup = BeautifulSoup(content, 'html.parser')
+    articleTag = soup.find_all('article')
+
+    for each in articleTag:
+        if each.find('svg'):
+            # ignore audio news
+            continue
+        dateStr = each.find('footer').find('span', {'aria-hidden': 'true'}).text
+        datePy = datetime.datetime.strptime(dateStr, '%d %b %Y').date()
+        baseUrl = "https://www.aljazeera.com"
+        baseUrl += each.find('div', {'class': 'gc__content'}).find('a')['href'].strip()
+        frame.append([datePy, dateStr, baseUrl])
+
+    # sort based on date
+    frame.sort(key=lambda k: k[0], reverse=True)
+
+    curArticle = 0
+
+    for each in frame:
+        # limit to 10 articles
+        if curArticle > 9:
+            break
+
+        article = requests.get(each[2])
+        article.encoding = 'utf-8'
+        article_content = article.content
+        soup_article = BeautifulSoup(article_content, 'html.parser')
+        allParagraph = soup_article.find('main', {'id': 'main-content-area'}).find_all('p')
+
+        newsTitle = soup_article.find('main', {'id': 'main-content-area'}).find('header', {'class': 'article-header'}).find('h1').text
+        each.append(newsTitle)
+
+        myArticle = []
+        for j in allParagraph:
+            if j.attrs.get('class') and 'article__subhead' in j.attrs['class']:
+                continue
+            myArticle.append(j.text)
+        finalArticle = "\r".join(myArticle)
+
+        each.append(finalArticle)
+
+        # generate sentence list
+        sentence = []
+        tokens = nlp(finalArticle)
+        for sent in tokens.sents:
+            sentence.append(sent.text.strip())
+        each.append(sentence)
+        articleInfo.append([each[1], each[2], each[3]])
+        curArticle += 1
+    frame = frame[:10]
+    global df
+    df = pd.DataFrame(frame, columns=['dateObj', 'dateStr', 'link', 'title', 'article', 'sentence'])
+
+
+def aljazeera_scraping_json(request):
+    jsondata = df.to_json(orient='index')
+    response = HttpResponse(jsondata, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format('scraping-summary')
+    return response
+
+
+def aljazeera_index(request):
+    Thread(target=aljazeera_scraping).start()
+    return render(request, 'data_warehouse/aljazeera_sentiment_analysis.html')
+
+
+def scraping_process_track(request):
+    response = {
+        'status': '',
+        'percent_of_completeness': 0,
+        'articleInfo': []
+    }
+    if request.is_ajax():
+        response['percent_of_completeness'] = round(curArticle / totalArticle * 100, 2)
+        response['articleInfo'] = articleInfo
+        response['status'] = 'success'
+    else:
+        response['status'] = 'fail'
+    return JsonResponse(response, safe=True)
+
+
+# def aljazeera_sentiment_analysis(request):
+#     return render(request, 'data_warehouse/shipment_search.html')
+#
+#
+#
+#
+#     print(1)
