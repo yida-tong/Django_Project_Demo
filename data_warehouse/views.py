@@ -331,8 +331,8 @@ def aljazeera_scraping_json(request):
 def aljazeera_index(request):
     path = settings.MEDIA_ROOT
     path2 = settings.STATIC_ROOT
-    open(os.path.join(path, 'mymedia.txt'), "x")
-    open(os.path.join(path2, 'mystatic.txt'), "x")
+    open(os.path.join(path, 'mymedia.txt'), "w")
+    open(os.path.join(path2, 'mystatic.txt'), "w")
     # Thread(target=aljazeera_scraping).start()
     aljazeera_scraping()
     return render(request, 'data_warehouse/aljazeera_sentiment_analysis.html')
