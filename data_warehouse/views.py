@@ -327,7 +327,8 @@ def aljazeera_scraping_json(request):
 
 
 def aljazeera_index(request):
-    Thread(target=aljazeera_scraping).start()
+    # Thread(target=aljazeera_scraping).start()
+    aljazeera_scraping()
     return render(request, 'data_warehouse/aljazeera_sentiment_analysis.html')
 
 
