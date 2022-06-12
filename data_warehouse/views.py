@@ -329,6 +329,10 @@ def aljazeera_scraping_json(request):
 
 
 def aljazeera_index(request):
+    path = settings.MEDIA_ROOT
+    path2 = settings.STATIC_ROOT
+    open(os.path.join(path, 'mymedia.txt'), "x")
+    open(os.path.join(path2, 'mystatic.txt'), "x")
     # Thread(target=aljazeera_scraping).start()
     aljazeera_scraping()
     return render(request, 'data_warehouse/aljazeera_sentiment_analysis.html')
@@ -387,8 +391,11 @@ def aljazeera_sentiment_analysis(request):
             width=1400,
             height=1200
         ).generate(text)
-        fileName = "wc_{}.png".format(requestIndex)
-        wordcloud.to_file(os.path.join(settings.MEDIA_ROOT, 'img', 'worldcloud', fileName))
+
+
+
+    # fileName = "wc_{}.png".format(requestIndex)
+        # wordcloud.to_file(os.path.join(settings.MEDIA_ROOT, 'img', 'worldcloud', fileName))
     else:
         return HttpResponseBadRequest()
     return JsonResponse(response, safe=True)
