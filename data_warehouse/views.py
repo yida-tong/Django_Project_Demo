@@ -11,8 +11,6 @@ import os
 from bs4 import BeautifulSoup
 import pandas as pd
 import nltk
-stop_words = set(nltk.corpus.stopwords.words('english'))
-
 from wordcloud import WordCloud
 from textblob import TextBlob
 
@@ -27,6 +25,8 @@ from django.conf import settings
 from .models import *
 from .forms import SearchShipmentForm
 from .tables import ShipmentTable
+
+stop_words = set(nltk.corpus.stopwords.words('english'))
 
 
 class Echo(object):
@@ -329,32 +329,27 @@ def aljazeera_scraping_json(request):
 
 
 def aljazeera_index(request):
-    # path = settings.MEDIA_ROOT
-    path2 = settings.STATIC_ROOT
-    # open(os.path.join(path, 'mymedia.txt'), "w")
-    open(os.path.join(path2, 'mystatic.txt'), "w")
-    # Thread(target=aljazeera_scraping).start()
-    aljazeera_scraping()
+    Thread(target=aljazeera_scraping).start()
     return render(request, 'data_warehouse/aljazeera_sentiment_analysis.html')
 
 
 def scraping_process_track(request):
     if request.is_ajax():
         response = articleInfo
+        return JsonResponse(response, safe=False)
     else:
         return HttpResponseBadRequest()
-    return JsonResponse(response, safe=False)
 
 
 def aljazeera_sentiment_analysis(request):
     if request.is_ajax():
-        requestIndex = int(request.GET['index'])
         response = {
             'polarity_score': [],
             'subjectivity_score': [],
             'words_axis': [],
             'wordsFreq_axis': []
         }
+        requestIndex = int(request.GET['index'])
         # sentence subjectivity analysis
 
         for s in frame[requestIndex][5]:
@@ -391,11 +386,8 @@ def aljazeera_sentiment_analysis(request):
             width=1400,
             height=1200
         ).generate(text)
-
-
-
-    # fileName = "wc_{}.png".format(requestIndex)
-        # wordcloud.to_file(os.path.join(settings.MEDIA_ROOT, 'img', 'worldcloud', fileName))
+        fileName = "wc_{}.png".format(requestIndex)
+        wordcloud.to_file(os.path.join(settings.MEDIA_ROOT, 'img', 'worldcloud', fileName))
+        return JsonResponse(response, safe=True)
     else:
         return HttpResponseBadRequest()
-    return JsonResponse(response, safe=True)
