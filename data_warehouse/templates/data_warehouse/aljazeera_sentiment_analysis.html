@@ -102,6 +102,7 @@
               url: "{% url 'data_warehouse:aljazeera_sentiment_analysis' %}",
               type: 'GET',
               data: {'index': index},
+              async: false
           });
 
           request.done(function(response) {
@@ -266,6 +267,7 @@
           var request = $.ajax({
               url: "{% url 'data_warehouse:scraping_process_track' %}",
               type: 'GET',
+              async: false
           });
 
           request.done(function(response) {
