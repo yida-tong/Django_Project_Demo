@@ -385,7 +385,7 @@ def aljazeera_sentiment_analysis(request):
             width=1400,
             height=1200
         ).generate(text)
-        # wordcloud.to_file("./static/img/worldcloud/wc_{}.png".format(requestIndex))
+        wordcloud.to_file("./static/img/worldcloud/wc_{}.png".format(requestIndex))
     else:
         return HttpResponseBadRequest()
     return JsonResponse(response, safe=True)
