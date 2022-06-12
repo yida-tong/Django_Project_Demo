@@ -6,10 +6,13 @@ import datetime
 import decimal
 import random
 import json
+
 from bs4 import BeautifulSoup
 import pandas as pd
-import spacy
-nlp = spacy.load('en_core_web_sm')
+import nltk
+stop_words = set(nltk.corpus.stopwords.words('english'))
+from wordcloud import WordCloud
+from textblob import TextBlob
 
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, StreamingHttpResponse
@@ -184,24 +187,6 @@ def shipment_import(request):
     return render(request, 'data_warehouse/import_shipments.html', context_dict)
 
 
-#
-# def shipment_listing(request):
-#     return
-#
-#
-
-#
-# def apply_surcharge(request):
-#     return
-
-
-
-# def unit_price_management(request):
-#     return
-#
-#
-
-
 def video_player(request):
     context_dict = {}
     return render(request, 'data_warehouse/video_tester.html', context_dict)
@@ -266,74 +251,14 @@ def shipment_search(request):
     else:
         return render(request, 'data_warehouse/shipment_search.html', context_dic)
 
-#
-# def shipment_add(request):
-#     context_dic = {
-#         'form': AddUnitPriceForm()
-#     }
-#     if request.method == 'POST':
-#         form = AddUnitPriceForm(request.POST)
-#         if form.is_valid():
-#             new_unit_price = form.save(commit=False)
-#             new_unit_price.save()
-#             messages.success(request, 'Unit prices have been saved.')
-#             return redirect('peripharma_billing:unit_price_index')
-#         else:
-#             context_dic['form'] = form
-#             messages.error(request, 'form is invalid')
-#     return render(request, 'peripharma_billing/unit_price/add.html', context_dic)
-#
-#
 
-
-# def shipment_update(request, pk):
-#     try:
-#         selected_shipment = Shipment.objects.get(id=pk)
-#     except Shipment.DoesNotExist:
-#         selected_shipment = None
-#     initial = {
-#         'amount': Shipment.amount,
-#         'billing_group': Shipment.billing_group,
-#         'start_date': Shipment.start_date,
-#         'end_date': Shipment.end_date
-#     }
-#     context_dic = {
-#         'form': UpdateUnitPriceForm(initial=initial),
-#         'unit_price': unit_price
-#     }
-#     if unit_price:
-#         if request.method == 'POST':
-#             form = UpdateUnitPriceForm(request.POST, initial=initial, pk=pk)
-#             context_dic['form'] = form
-#             if form.is_valid():
-#                 if form.has_changed():
-#                     cleaned_form = form.cleaned_data
-#                     for each in form.changed_data:
-#                         setattr(unit_price, each, cleaned_form[each])
-#                     try:
-#                         unit_price.save()
-#                         context_dic['form'] = UpdateUnitPriceForm(request.POST, pk=pk)
-#                         messages.success(request, 'unit price has been updated')
-#                     except ValidationError as e:
-#                         messages.error(request, e.messages)
-#                 else:
-#                     messages.info(request, 'nothing has been changed')
-#             else:
-#                 messages.error(request, 'form is invalid')
-#         return render(request, 'peripharma_billing/unit_price/update.html', context_dic)
-#     else:
-#         return HttpResponse('unit price does not exist')
 frame = []
 articleInfo = []
 df = None
 
-totalArticle = 10
-curArticle = 0
-
 
 def aljazeera_scraping():
     global frame
-    global curArticle
     global articleInfo
     frame = []
     articleInfo = []
@@ -380,15 +305,12 @@ def aljazeera_scraping():
                 continue
             myArticle.append(j.text)
         finalArticle = "\r".join(myArticle)
-
         each.append(finalArticle)
 
         # generate sentence list
-        sentence = []
-        tokens = nlp(finalArticle)
-        for sent in tokens.sents:
-            sentence.append(sent.text.strip())
+        sentence = nltk.sent_tokenize(finalArticle)
         each.append(sentence)
+
         articleInfo.append([each[1], each[2], each[3]])
         curArticle += 1
     frame = frame[:10]
@@ -409,24 +331,59 @@ def aljazeera_index(request):
 
 
 def scraping_process_track(request):
-    response = {
-        'status': '',
-        'percent_of_completeness': 0,
-        'articleInfo': []
-    }
     if request.is_ajax():
-        response['percent_of_completeness'] = round(curArticle / totalArticle * 100, 2)
-        response['articleInfo'] = articleInfo
-        response['status'] = 'success'
+        response = articleInfo
     else:
-        response['status'] = 'fail'
+        return HttpResponseBadRequest()
+    return JsonResponse(response, safe=False)
+
+
+def aljazeera_sentiment_analysis(request):
+    if request.is_ajax():
+        requestIndex = int(request.GET['index'])
+        response = {
+            'polarity_score': [],
+            'subjectivity_score': [],
+            'words_axis': [],
+            'wordsFreq_axis': []
+        }
+        # sentence subjectivity analysis
+
+        for s in frame[requestIndex][5]:
+            tb = TextBlob(s)
+            response['polarity_score'].append(tb.sentiment.polarity)
+            response['subjectivity_score'].append(tb.sentiment.subjectivity)
+
+        # word freq analysis
+        tokens = nltk.tokenize.word_tokenize(frame[requestIndex][4])
+        new_words = [w.lower() for w in tokens]
+
+        # data cleaning: keep alpha only (remove number and punctuation)
+        new_words = [w for w in new_words if w.isalpha()]
+
+        # data cleaning: remove stop words
+        new_words = [w for w in new_words if w not in stop_words]
+
+        # word freq dataset (limit to top 25 words)
+        freq_dist = nltk.FreqDist(new_words)
+        sortList = []
+        for k, v in freq_dist.items():
+            sortList.append((k, v))
+        sortList.sort(key=lambda a: a[1], reverse=True)
+        sortList = sortList[:25]
+        for k, v in sortList:
+            response['words_axis'].append(k)
+            response['wordsFreq_axis'].append(v)
+
+        # generate wordcloud img
+        text = ' '.join([i for i in response['words_axis']])
+        wordcloud = WordCloud(
+            background_color='black',
+            max_words=25,
+            width=1400,
+            height=1200
+        ).generate(text)
+        wordcloud.to_file("./static/img/worldcloud/wc_{}.png".format(requestIndex))
+    else:
+        return HttpResponseBadRequest()
     return JsonResponse(response, safe=True)
-
-
-# def aljazeera_sentiment_analysis(request):
-#     return render(request, 'data_warehouse/shipment_search.html')
-#
-#
-#
-#
-#     print(1)

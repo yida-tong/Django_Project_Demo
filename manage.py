@@ -2,11 +2,20 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import nltk
+import ssl
 
 
 def main():
     """Run administrative tasks."""
-    # os.system("python -m spacy download en_core_web_sm")
+    try:
+        _create_unverified_https_context = ssl._create_unverified_context
+    except AttributeError:
+        pass
+    else:
+        ssl._create_default_https_context = _create_unverified_https_context
+    nltk.download('all')
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_qualified.settings')
     try:
         from django.core.management import execute_from_command_line

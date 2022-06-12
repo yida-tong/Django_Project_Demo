@@ -17,24 +17,6 @@
 {% endblock %}
 
 {% block extra_css %}
-{#  <link rel="stylesheet" href="{% static 'bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">#}
-{#  <style>#}
-{#      .overlay {#}
-{#          display: none;#}
-{#          position: absolute;#}
-{#          top: 0;#}
-{#          left: 0;#}
-{#          width: 100%;#}
-{#          height: 100%;#}
-{#          background-color: rgba(255,255,255,0.8);#}
-{#          z-index: 5000;#}
-{#          text-align: center;#}
-{#          padding-top: 20%;#}
-{#      }#}
-{#      .overlay i {#}
-{#          font-size: 80px;#}
-{#      }#}
-{#  </style>#}
   <style>
     .disabled-link {
         color: currentColor;
@@ -48,22 +30,18 @@
 
 
 {% block main_content %}
-{#  <div class="overlay">#}
-{#    <h1>Processing...</h1><br>#}
-{#    <i class="fa fa-refresh fa-spin"></i>#}
-{#  </div>#}
-
-{#  {% err_msg messages %}#}
   <div class="container-fluid">
     <div class="box box-solid">
-      <div class="box-header with-border">
-        <h3 class="box-title">Progress bars</h3>
-      </div>
       <!-- /.box-header -->
       <div class="box-body">
         <div id="progressBar" class="progress active">
           <div id="myProgress" class="progress-bar progress-bar-yellow progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-            <span id="progress_text">0 %</span>
+            <span id="progress_text"></span>
+          </div>
+        </div>
+        <div id="progressBar_one" class="progress active">
+          <div id="myProgress_one" class="progress-bar progress-bar-aqua progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+            <span id="progress_text_one"></span>
           </div>
         </div>
       </div>
@@ -72,8 +50,7 @@
 
     <div class="box box-primary">
       <div class="box-header with-border">
-        <h3 class="box-title">Recently news</h3>
-
+        <h3 class="box-title"><a href="https://www.aljazeera.com/news/">10 Most Recently News</a></h3>
         <div class="box-tools pull-right">
           <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
           </button>
@@ -108,138 +85,228 @@
 
   </div>
 
-  <div class="modal fade" id="modal-default">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Default Modal</h4>
-        </div>
-        <div class="modal-body">
-          <p>One fine body&hellip;</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-      <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
+  <div id="model-collection">
   </div>
-  <!-- /.modal -->
-
-
-{#  <div class="box box-solid">#}
-{#    <div class="box-body">#}
-{#      <form class="form" method="GET" action="{% url 'data_warehouse:shipment_search' %}">#}
-{#        <div class="row">#}
-{#          {% for each in form %}#}
-{#            <div class="col-lg-3 col-md-3">#}
-{#              <div class="form-group">#}
-{#                <em class="text-red">{{ each.errors }}</em>#}
-{#                <label for="{{ each.id_for_label }}">{{ each.label }}</label>#}
-{#                {% if each.help_text %}#}
-{#                  <sup class="badge badge-dark" data-toggle="tooltip" data-placement="top" title="{{ each.help_text }}"><i class="fas fa-info"></i></sup>#}
-{#                {% endif %}#}
-{#                {{ each }}#}
-{#              </div>#}
-{#            </div>#}
-{#          {% endfor %}#}
-{#        </div>#}
-{#        <button id="Search" type="submit" class="btn btn-primary" name="action" value="search">Search</button>#}
-{#        <button type="submit" class="btn btn-primary" name="action" value="download-as-csv">Download as csv</button>#}
-{#      </form>#}
-{#    </div>#}
-{#  </div>#}
-
-{#  {% if table %}#}
-{#    <div class="box box-solid">#}
-{#      <div class="box-header">#}
-{#        <h2 class="box-title">Data Table</h2>#}
-{#      </div>#}
-{#      <div class="box-body">#}
-{#        {% if filter_msg %}#}
-{#          <div id="filter-bar">#}
-{#            <strong>{{ total_shipments }}</strong> total shipments returned for#}
-{#            {% for key, value in filter_msg.items %}#}
-{#              {% if forloop.counter == filter_msg|length %}#}
-{#                {{ key }}: "<strong>{{ value }}</strong>"#}
-{#              {% else %}#}
-{#                {{ key }}: "<strong>{{ value }}</strong>",#}
-{#              {% endif %}#}
-{#            {% endfor %}#}
-{#          </div>#}
-{#          <br>#}
-{#        {% endif %}#}
-{#        {% render_table table %}#}
-{#      </div>#}
-{#    </div>#}
-{#  {% endif %}#}
 {% endblock %}
 
 {% block extra_js %}
-{#  <script src="{% static 'bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>#}
+  <script src="{% static 'js/plotly/plotly-2.12.1.min.js' %}"></script>
   <script>
       var articleInHTML = 0;
-      {#$(document).ready(function () {#}
-      {#    function ShowLoading() {#}
-      {#        $(".overlay").show();#}
-      {#    }#}
-      {#    $("#Search").on("click", ShowLoading)#}
-      {##}
+      var myInterval;
+      var completeAnalysis = 0;
   </script>
   <script>
-      function ProcessCheck() {
+      function sentiment_analysis(index) {
           var request = $.ajax({
-              url: "{% url 'data_warehouse:scraping_process_track' %}",
-              type: 'GET'
+              url: "{% url 'data_warehouse:aljazeera_sentiment_analysis' %}",
+              type: 'GET',
+              data: {'index': index},
           });
 
           request.done(function(response) {
-              if (response.status === 'success') {
-                  $('#myProgress').attr('style', 'width:'+response['percent_of_completeness']+'%').attr('aria-valuenow', response['percent_of_completeness']);
-                  $('#progress_text').html(response['percent_of_completeness']+' %')
+            var myIndex = index.toString();
+            var template = `
+                            <div class="modal fade" id="modal-default-${myIndex}" style="overflow: auto; white-space: nowrap;">
+                              <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title">Sentiment Analysis <i class="fa fa-frown-o" aria-hidden="true"></i><i class="fa fa-meh-o" aria-hidden="true"></i><i class="fa fa-smile-o" aria-hidden="true"></i></h4>
+                                  </div>
+                                  <div class="modal-body">
+                                    <div class="row">
+                                      <div class="col-md-6">
+                                        <div class="box box-primary">
+                                          <div class="box-header with-border">
+                                            <h3 class="box-title">Histograms Chart</h3>
+                                          </div>
+                                          <div class="box-body chart-responsive">
+                                            <div class="chart" id="bar-chart-${myIndex}" style="height: 350px;overflow: auto; white-space: nowrap;"></div>
+                                          </div>
+                                        </div>
+                                      </div>
 
-                  for (var i=articleInHTML; i< response['articleInfo'].length; i++) {
-                      var template = `
-                                      <li class="item">
-                                        <div class="product-img" data-toggle="modal" data-target="#modal-default">
-                                          <img src="{% static 'img/log1.jpeg' %}" alt="Product Image">
+                                      <div class="col-md-6">
+                                        <div class="box box-info">
+                                          <div class="box-header with-border">
+                                            <h3 class="box-title">Line Chart</h3>
+                                          </div>
+                                          <div class="box-body chart-responsive">
+                                            <div class="chart" id="line-chart-${myIndex}" style="height: 350px;overflow: auto; white-space: nowrap;"></div>
+                                          </div>
                                         </div>
-                                        <div class="product-info">
-                                            <a href="${response['articleInfo'][i][1]}" class="product-title">${response['articleInfo'][i][2]}
-                                                <span class="label label-warning pull-right">${response['articleInfo'][i][0]}</span>
-                                            </a>
-                                        </div>
-                                      </li>
-                                     `
-                      articleInHTML++;
-                      $('#myNews').append(template);
-                  }
-              }
-              if (response['percent_of_completeness']===100) {
-                  $('#progressBar').attr('class', 'progress');
-                  $('#jsonLink').attr('class', '');
-              }
+                                      </div>
+                                    </div>
+
+                                    <div class="box box-danger">
+                                      <div class="box-header with-border">
+                                        <h3 class="box-title">World Cloud</h3>
+                                      </div>
+                                      <div class="box-body chart-responsive">
+                                        <img class="img-responsive pad" src="../../static/img/worldcloud/wc_${myIndex}.png" alt="wc" style="margin: auto;">
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          `
+            $('#model-collection').append(template);
+
+            var trace1 = {
+                x: response['polarity_score'],
+                name: 'Polarity',
+                histnorm: "count",
+                marker: {
+                    color: "rgba(255, 100, 102, 0.7)",
+                    line: {
+                        color:  "rgba(255, 100, 102, 1)",
+                        width: 1
+                    }
+                },
+                opacity: 1,
+                type: "histogram",
+                xbins: {
+                    end: 1,
+                    size: 0.03,
+                    start: -1
+                }
+            };
+            var trace2 = {
+                x: response['subjectivity_score'],
+                name: "Subjectivity",
+                histnorm: "count",
+                marker: {
+                    color: "rgba(100, 200, 102, 0.7)",
+                    line: {
+                        color:  "rgba(100, 200, 102, 1)",
+                        width: 1
+                    }
+                },
+                opacity: 0.7,
+                type: "histogram",
+                xbins: {
+                    end: 1,
+                    size: 0.03,
+                    start: 0
+
+                }
+            };
+            var data = [trace1, trace2];
+            var layout = {
+                legend: {"orientation": "h"},
+                barmode: "overlay",
+                title: "Polarity & Subjectivity Distribution",
+                xaxis: {
+                    automargin: true,
+                    title: 'Score',
+                    showline: true,
+                },
+                yaxis: {
+                    title: 'Textblob Score Distribution',
+                    showgrid: true,
+                    showline: true,
+                    automargin: true,
+                },
+                autosize: true,
+                margin: {
+                    r: 0,
+                },
+            };
+            Plotly.newPlot("bar-chart-"+myIndex, data, layout, {displayModeBar: false});
+
+
+            var lineData = [{x: response['words_axis'], y: response['wordsFreq_axis']}];
+            var lineLayout = {
+                title: 'Words Frequency',
+                showlegend: false,
+                xaxis: {
+                    automargin: true,
+                    title: '25 Most Common Words',
+                    showline: true,
+                    showgrid: true,
+                    showticklabels: true,
+                    autotick: false,
+                },
+                yaxis: {
+                    title: 'Count',
+                    showgrid: true,
+                    showline: true,
+                    showticklabels: true
+                },
+                autosize: true,
+                margin: {
+                    r: 0,
+                },
+            };
+            Plotly.newPlot('line-chart-'+myIndex, lineData, lineLayout, {displayModeBar: false});
+            document.getElementById("icon_"+myIndex).style.display = "none";
+            document.getElementById("img_"+myIndex).removeAttribute("hidden");
+            completeAnalysis++;
+            // progress bar
+            var percent = (completeAnalysis/10*100);
+            $('#myProgress_one').attr('style', 'width:'+percent+'%').attr('aria-valuenow', percent);
+            $('#progress_text_one').html('Sentiment Analysis: '+percent+' %')
+            if (completeAnalysis===10) {
+                $('#progressBar_one').attr('class', 'progress');
+            }
           });
           request.fail(function(response) {
-              console.log('Failed to track progress. Something is wrong in server.')
+              alert('ajax request fail 2');
+          });
+      }
+
+      function ProcessCheck() {
+          if (articleInHTML===10) clearInterval(myInterval);
+          var request = $.ajax({
+              url: "{% url 'data_warehouse:scraping_process_track' %}",
+              type: 'GET',
+          });
+
+          request.done(function(response) {
+            for (var i=articleInHTML; i< response.length; i++) {
+                var template = `
+                                <li class="item">
+                                  <div class="product-img" data-toggle="modal" data-target="#modal-default-${i}">
+                                    <i id="icon_${i}" class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+                                    <img id="img_${i}" src="{% static 'img/log1.jpeg' %}" alt="Product Image" hidden>
+                                  </div>
+                                  <div class="product-info">
+                                      <a href="${response[i][1]}" class="product-title">${response[i][2]}
+                                          <span class="label label-warning pull-right">${response[i][0]}</span>
+                                      </a>
+                                  </div>
+                                </li>
+                               `
+                articleInHTML++;
+                $('#myNews').append(template);
+                // progress bar
+                var percent = (articleInHTML/10*100);
+                $('#myProgress').attr('style', 'width:'+percent+'%').attr('aria-valuenow', percent);
+                $('#progress_text').html('Article Fetch: '+percent+' %')
+                if (articleInHTML===10) {
+                    $('#progressBar').attr('class', 'progress');
+                    $('#jsonLink').attr('class', '');
+                }
+                sentiment_analysis(i);
+            }
+          });
+          request.fail(function(response) {
+              alert('ajax request fail 1');
           });
       }
 
       function ProcessHandler() {
-          setInterval(ProcessCheck, 50);
+          myInterval = setInterval(ProcessCheck, 100);
       }
 
       $(document).ready(function() {
           ProcessHandler();
       });
   </script>
-{#  <script>#}
-{#      $(document).ready(function () {#}
-{#          $("th.asc").append("<br><span class ='glyphicon glyphicon-sort-by-attributes' style='color:#3c8dbc'></span>");#}
-{#          $("th.desc").append("<br><span class ='glyphicon glyphicon-sort-by-attributes-alt' style='color:#3c8dbc'></span>");#}
-{#      })#}
-{#  </script>#}
 {% endblock %}

@@ -14,6 +14,7 @@ urlpatterns = [
     path('aljazeera_index/', views.aljazeera_index, name='aljazeera_index'),
     path('scraping_process_track/', views.scraping_process_track, name='scraping_process_track'),
     path('aljazeera_scraping_json/', views.aljazeera_scraping_json, name='aljazeera_scraping_json'),
+    path('aljazeera_sentiment_analysis/', views.aljazeera_sentiment_analysis, name='aljazeera_sentiment_analysis'),
     # path('shipment_add/', views.shipment_add, name='shipment_add'),
     # path('shipment_update/', views.shipment_update, name='shipment_edit'),
     # path('shipment_delete/', views.shipment_delete, name='shipment_delete'),

@@ -13,4 +13,6 @@ urllib3==1.26.6
 whitenoise==5.3.0
 beautifulsoup4
 pandas
-spacy
+wordcloud
+textblob
+nltk
