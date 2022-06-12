@@ -388,7 +388,7 @@ def aljazeera_sentiment_analysis(request):
             height=1200
         ).generate(text)
         fileName = "wc_{}.png".format(requestIndex)
-        wordcloud.to_file(os.path.join(settings.STATIC_ROOT, 'img', 'worldcloud', fileName))
+        wordcloud.to_file(os.path.join(settings.MEDIA_ROOT, 'img', 'worldcloud', fileName))
     else:
         return HttpResponseBadRequest()
     return JsonResponse(response, safe=True)
