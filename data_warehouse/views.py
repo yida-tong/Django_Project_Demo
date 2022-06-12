@@ -378,13 +378,13 @@ def aljazeera_sentiment_analysis(request):
             response['wordsFreq_axis'].append(v)
 
         # generate wordcloud img
-        # text = ' '.join([i for i in response['words_axis']])
-        # wordcloud = WordCloud(
-        #     background_color='black',
-        #     max_words=25,
-        #     width=1400,
-        #     height=1200
-        # ).generate(text)
+        text = ' '.join([i for i in response['words_axis']])
+        wordcloud = WordCloud(
+            background_color='black',
+            max_words=25,
+            width=1400,
+            height=1200
+        ).generate(text)
         # wordcloud.to_file("./static/img/worldcloud/wc_{}.png".format(requestIndex))
     else:
         return HttpResponseBadRequest()
