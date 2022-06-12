@@ -12,7 +12,7 @@ import pandas as pd
 import nltk
 stop_words = set(nltk.corpus.stopwords.words('english'))
 
-# from wordcloud import WordCloud
+from wordcloud import WordCloud
 from textblob import TextBlob
 
 from django.shortcuts import render
