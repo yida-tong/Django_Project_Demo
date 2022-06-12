@@ -6,6 +6,7 @@ import datetime
 import decimal
 import random
 import json
+import os
 
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -21,6 +22,7 @@ from django.contrib import messages
 from django.db.models import F, Value, CharField
 from django.db.models.functions import Concat
 from django_tables2 import RequestConfig
+from django.conf import settings
 
 from .models import *
 from .forms import SearchShipmentForm
@@ -385,7 +387,8 @@ def aljazeera_sentiment_analysis(request):
             width=1400,
             height=1200
         ).generate(text)
-        wordcloud.to_file("./static/img/worldcloud/wc_{}.png".format(requestIndex))
+        fileName = "wc_{}.png".format(requestIndex)
+        wordcloud.to_file(os.path.join(settings.BASE_DIR, 'static', 'img', 'worldcloud', fileName))
     else:
         return HttpResponseBadRequest()
     return JsonResponse(response, safe=True)
