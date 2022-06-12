@@ -10,8 +10,7 @@ import json
 from bs4 import BeautifulSoup
 import pandas as pd
 import nltk
-# stop_words = set(nltk.corpus.stopwords.words('english'))
-stop_words = set()
+stop_words = set(nltk.corpus.stopwords.words('english'))
 
 from wordcloud import WordCloud
 from textblob import TextBlob
