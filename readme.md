@@ -1,5 +1,3 @@
-### About aljazeera sentiment analysis assignment:
-
 General mechanism:
 
 * First time you request the index page, web scraping of 10 most recent articles (https://www.aljazeera.com/news/) will start. Package used for web scraping is beautiful soup. 
